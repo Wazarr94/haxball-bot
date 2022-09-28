@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 (async () => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({args: ["--disable-features=WebRtcHideLocalIpsWithMdns"]});
   const page = await browser.newPage();
   await page.goto('https://haxball.com/headless', { waitUntil: 'networkidle2' });
 
