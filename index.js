@@ -7,6 +7,16 @@ const puppeteer = require("puppeteer");
   });
   const page = await browser.newPage();
 
+  // https://stackoverflow.com/questions/47539043/how-to-get-all-console-messages-with-puppeteer-including-errors-csp-violations
+  page
+    .on('console', message =>
+      console.log(`${message.type().substring(0, 3).toUpperCase()} ${message.text()}`))
+    .on('pageerror', ({ message }) => console.log(message))
+    .on('response', response =>
+      console.log(`${response.status()} ${response.url()}`))
+    .on('requestfailed', request =>
+      console.log(`${request.failure().errorText} ${request.url()}`))
+
   const client = await page.target().createCDPSession();
 
   await client.send("Page.setDownloadBehavior", {
@@ -16,20 +26,6 @@ const puppeteer = require("puppeteer");
 
   await page.goto("https://haxball.com/headless", {
     waitUntil: "networkidle2",
-  });
-
-  page.on("console", async (msg) => {
-    const msgArgs = msg.args();
-    for (let i = 0; i < msgArgs.length; ++i) {
-      console.log(await msgArgs[i].jsonValue());
-    }
-  });
-
-  page.on("error", async (msg) => {
-    const msgArgs = msg.args();
-    for (let i = 0; i < msgArgs.length; ++i) {
-      console.log(await msgArgs[i].jsonValue());
-    }
   });
 
   page.addScriptTag({ path: "./haxball_script.js" });
